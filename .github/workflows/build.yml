@@ -15,7 +15,7 @@ jobs:
           dotnet restore                        # install packages
           dotnet build -c Release --no-restore  # build
           
-          export CZ_PLUGIN_MANIFEST="=${{ github.workspace }}/manifest.json"
+          export CZ_PLUGIN_MANIFEST="${{ github.workspace }}/manifest.json"
           export CZ_PLUGIN_VERSION="$(cat $CZ_PLUGIN_MANIFEST | jq -r '.version')-${{ env.GITHUB_SHA }}"
 
           echo "CZ_PLUGIN_MANIFEST=$CZ_PLUGIN_MANIFEST" >> $GITHUB_ENV
