@@ -2,7 +2,9 @@ name: 'Build'
 on:
   push:
     branches:
-    - master
+      - master
+    tags:
+      - '*'
 jobs:
   build:
     permissions:
@@ -12,13 +14,33 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build
+      - name: Setup Release Manifest Variables
+        if: ${{ github.ref != 'refs/heads/main' }}
         run: |
-          # get info from manifest.json and build
+          # get release version from manifest.json
+          export CZ_PLUGIN_MANIFEST="${{ github.workspace }}/manifest.json"
+          export CZ_PLUGIN_VERSION="$(cat $CZ_PLUGIN_MANIFEST | jq -r '.version')"
+
+          # pass variables to next steps
+          echo "CZ_PLUGIN_MANIFEST=$CZ_PLUGIN_MANIFEST" >> $GITHUB_ENV
+          echo "CZ_PLUGIN_VERSION=$CZ_PLUGIN_VERSION" >> $GITHUB_ENV
+
+      - name: Setup Beta Manifest Variables
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          # get beta version from manifest.json
           export CZ_PLUGIN_MANIFEST="${{ github.workspace }}/manifest.json"
           export CZ_PLUGIN_VERSION="$(cat $CZ_PLUGIN_MANIFEST | jq -r '.version')-beta-$(date +%Y%m%d%H%M%S)"
-          export CZ_PLUGIN_NAME="$(cat $CZ_PLUGIN_MANIFEST | jq -r '.name')"
-          export CZ_PLUGIN_PACKAGE_NAME="${CZ_PLUGIN_NAME}.${CZ_PLUGIN_VERSION}"
+
+          # pass variables to next steps
+          echo "CZ_PLUGIN_MANIFEST=$CZ_PLUGIN_MANIFEST" >> $GITHUB_ENV
+          echo "CZ_PLUGIN_VERSION=$CZ_PLUGIN_VERSION" >> $GITHUB_ENV
+
+      - name: Build
+        run: |
+          # build
+          export CZ_PLUGIN_NAME="$(cat ${{ env.CZ_PLUGIN_MANIFEST }} | jq -r '.name')"
+          export CZ_PLUGIN_PACKAGE_NAME="${CZ_PLUGIN_NAME}.${{ env.CZ_PLUGIN_VERSION }}"
           export CZ_NUGET_PATH="${{ github.workspace }}/bin/${CZ_PLUGIN_PACKAGE_NAME}.nupkg"
 
           # pass variables to next steps
@@ -27,8 +49,14 @@ jobs:
 
           # build
           dotnet restore
-          dotnet build -c Release --no-restore -p:PackageVersion=${CZ_PLUGIN_VERSION} -p:ChoriziteSetPackageVersion=False
+          dotnet build -c Release --no-restore -p:PackageVersion=${{ env.CZ_PLUGIN_VERSION }} -p:ChoriziteSetPackageVersion=False
         
+      - name: Package plugin.zip for release
+        if: ${{ github.ref != 'refs/heads/main' }}
+        run: |
+          cd "${{ github.workspace }}/bin/net8.0/"
+          zip -r "${{ github.workspace }}/bin/${{ env.CZ_PLUGIN_PACKAGE_NAME }}.zip" "${{ github.workspace }}/bin/net8.0/"
+
       - uses: actions/upload-artifact@v4
         with: 
           name: "${{ env.CZ_PLUGIN_PACKAGE_NAME }}.nupkg"
@@ -37,10 +65,16 @@ jobs:
       - uses: actions/upload-artifact@v4
         with: 
           name: "${{ env.CZ_PLUGIN_PACKAGE_NAME }}.zip"
-          path: "${{ github.workspace }}/bin/net8.0/"
+          path: "${{ github.workspace }}/bin/${{ env.CZ_PLUGIN_PACKAGE_NAME }}.zip"
 
       - name: Push GitHub NuGet Package
         run: |
           dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
           dotnet nuget push "${{ env.CZ_NUGET_PATH }}" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
       
+      - name: Upload release binaries
+        uses: alexellis/upload-assets@0.4.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          asset_paths: '["${{ github.workspace }}/bin/${{ env.CZ_PLUGIN_PACKAGE_NAME }}.zip"]'
