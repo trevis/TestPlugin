@@ -14,11 +14,13 @@ jobs:
         run: |
           dotnet restore                        # install packages
           dotnet build -c Release --no-restore  # build
-          echo $GITHUB_ENV
           echo "CZ_PLUGIN_MANIFEST=${{ github.workspace }}/manifest.json" >> $GITHUB_ENV
+          source $GITHUB_ENV
           echo "CZ_PLUGIN_VERSION=$(cat ${{ env.CZ_PLUGIN_MANIFEST }} | jq -r '.version')-${{ env.GITHUB_SHA }}" >> $GITHUB_ENV
           echo "CZ_PLUGIN_NAME=$(cat ${{ env.CZ_PLUGIN_MANIFEST }} | jq -r '.name')" >> $GITHUB_ENV
+          source $GITHUB_ENV
           echo "CZ_PLUGIN_PACKAGE_NAME=${{ env.CZ_PLUGIN_NAME }}.${{ env.CZ_PLUGIN_VERSION }}" >> $GITHUB_ENV
+          source $GITHUB_ENV
           echo "CZ_NUGET_PATH=${{ github.workspace }}/bin/${{ env.CZ_PLUGIN_PACKAGE_NAME }}.nupkg" >> $GITHUB_ENV
         
       - uses: actions/upload-artifact@v4
