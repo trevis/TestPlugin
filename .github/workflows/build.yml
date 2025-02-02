@@ -5,6 +5,8 @@ on:
     - master
 jobs:
   build:
+    permissions:
+      packages: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -34,11 +36,11 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with: 
-          name: "${{ env.CZ_PLUGIN_PACKAGE_NAME }}"
+          name: "${{ env.CZ_PLUGIN_PACKAGE_NAME }}.zip"
           path: "${{ github.workspace }}/bin/net8.0/"
 
       - name: Push GitHub NuGet Package
         run: |
-          dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository }}/index.json"
+          dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
           dotnet nuget push "${{ env.CZ_NUGET_PATH }}" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
       
