@@ -17,9 +17,12 @@ jobs:
           
           export CZ_PLUGIN_MANIFEST="${{ github.workspace }}/manifest.json"
           export CZ_PLUGIN_VERSION="$(cat $CZ_PLUGIN_MANIFEST | jq -r '.version')-${{ env.GITHUB_SHA }}"
+          export CZ_PLUGIN_NAME="$(cat ${{ env.CZ_PLUGIN_MANIFEST }} | jq -r '.name')"
+          export CZ_PLUGIN_PACKAGE_NAME="${{ env.CZ_PLUGIN_NAME }}.${{ env.CZ_PLUGIN_VERSION }}"
+          export CZ_NUGET_PATH="${{ github.workspace }}/bin/${{ env.CZ_PLUGIN_PACKAGE_NAME }}.nupkg"
 
-          echo "CZ_PLUGIN_MANIFEST=$CZ_PLUGIN_MANIFEST" >> $GITHUB_ENV
-          echo "CZ_PLUGIN_VERSION=CZ_PLUGIN_VERSION" >> $GITHUB_ENV
+          echo "CZ_PLUGIN_PACKAGE_NAME=$CZ_PLUGIN_PACKAGE_NAME" >> $GITHUB_ENV
+          echo "CZ_NUGET_PATH=$CZ_NUGET_PATH" >> $GITHUB_ENV
         
       - uses: actions/upload-artifact@v4
         with: 
