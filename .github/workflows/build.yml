@@ -27,7 +27,7 @@ jobs:
 
           # build
           dotnet restore
-          dotnet build -c Release --no-restore -p:PackageVersion=${CZ_PLUGIN_VERSION}
+          dotnet build -c Release --no-restore -p:PackageVersion=${CZ_PLUGIN_VERSION} -p:ChoriziteSetPackageVersion=False
         
       - uses: actions/upload-artifact@v4
         with: 

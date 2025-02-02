@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <PackageReference Include="Chorizite.Core" Version="0.0.3" ExcludeAssets="runtime" />
-    <PackageReference Include="Chorizite.Plugins.MSBuildTasks" Version="0.0.1" />
+    <PackageReference Include="Chorizite.Plugins.MSBuildTasks" Version="0.0.3" />
   </ItemGroup>
 
   <ItemGroup>
