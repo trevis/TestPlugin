@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Release Manifest Variables
-        if: ${{ github.ref != 'refs/heads/main' }}
+        if: ${{ github.ref != 'refs/heads/master' }}
         run: |
           # get release version from manifest.json
           export CZ_PLUGIN_MANIFEST="${{ github.workspace }}/manifest.json"
@@ -26,7 +26,7 @@ jobs:
           echo "CZ_PLUGIN_VERSION=$CZ_PLUGIN_VERSION" >> $GITHUB_ENV
 
       - name: Setup Beta Manifest Variables
-        if: ${{ github.ref == 'refs/heads/main' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           # get beta version from manifest.json
           export CZ_PLUGIN_MANIFEST="${{ github.workspace }}/manifest.json"
@@ -72,6 +72,7 @@ jobs:
           dotnet nuget push "${{ env.CZ_NUGET_PATH }}" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
       
       - name: Upload release binaries
+        if: ${{ github.ref != 'refs/heads/master' }}
         uses: alexellis/upload-assets@0.4.0
         env:
           GITHUB_TOKEN: ${{ github.token }}
