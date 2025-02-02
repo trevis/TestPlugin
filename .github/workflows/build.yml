@@ -12,9 +12,6 @@ jobs:
 
       - name: Build
         run: |
-          dotnet restore                        # install packages
-          dotnet build -c Release --no-restore  # build
-          
           # manifest.json variables
           export CZ_PLUGIN_MANIFEST="${{ github.workspace }}/manifest.json"
           export CZ_PLUGIN_VERSION="$(cat $CZ_PLUGIN_MANIFEST | jq -r '.version')-beta"
@@ -25,6 +22,10 @@ jobs:
           # pass variables to next steps
           echo "CZ_PLUGIN_PACKAGE_NAME=$CZ_PLUGIN_PACKAGE_NAME" >> $GITHUB_ENV
           echo "CZ_NUGET_PATH=$CZ_NUGET_PATH" >> $GITHUB_ENV
+
+          # build
+          dotnet restore
+          dotnet build -c Release --no-restore -p:Version=${CZ_PLUGIN_VERSION}
         
       - uses: actions/upload-artifact@v4
         with: 
