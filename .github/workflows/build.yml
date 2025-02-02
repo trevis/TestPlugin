@@ -14,18 +14,19 @@ jobs:
         run: |
           dotnet restore                        # install packages
           dotnet build -c Release --no-restore  # build
-          echo "CZ_PLUGIN_VERSION=$(cat ${{ github.workspace }} | jq -r '.version')" >> $GITHUB_ENV
+          echo "CZ_PLUGIN_VERSION=$(cat ${{ github.workspace }} | jq -r '.version')-${{ env.GITHUB_SHA }}" >> $GITHUB_ENV
           echo "CZ_PLUGIN_NAME=$(cat ${{ github.workspace }} | jq -r '.name')" >> $GITHUB_ENV
-          echo "CZ_NUGET_PATH=${{ github.workspace }}/bin/$(cat ${{ github.workspace }}/manifest.json | jq -r '.name').$(cat ${{ github.workspace }} | jq -r '.version')--${{ env.GITHUB_SHA }}.nupkg" >> $GITHUB_ENV
+          echo "CZ_PLUGIN_PACKAGE_NAME=${{ env.CZ_PLUGIN_NAME }}.${{ env.CZ_PLUGIN_VERSION }}" >> $GITHUB_ENV
+          echo "CZ_NUGET_PATH=${{ github.workspace }}/bin/${{ env.CZ_PLUGIN_PACKAGE_NAME }}.nupkg" >> $GITHUB_ENV
         
       - uses: actions/upload-artifact@v4
         with: 
-          name: "${{ env.CZ_PLUGIN_NAME }}.${{ env.CZ_PLUGIN_VERSION }}.nupkg"
+          name: "${{ env.CZ_PLUGIN_PACKAGE_NAME }}.nupkg"
           path: "${{ env.CZ_NUGET_PATH }}"
 
       - uses: actions/upload-artifact@v4
         with: 
-          name: "${{ env.CZ_PLUGIN_NAME }}.${{ env.CZ_PLUGIN_VERSION }}"
+          name: "${{ env.CZ_PLUGIN_PACKAGE_NAME }}"
           path: "${{ github.workspace }}/bin/net8.0/"
 
       - name: Push GitHub NuGet Package
