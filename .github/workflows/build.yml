@@ -16,7 +16,7 @@ jobs:
         run: |
           # get info from manifest.json and build
           export CZ_PLUGIN_MANIFEST="${{ github.workspace }}/manifest.json"
-          export CZ_PLUGIN_VERSION="$(cat $CZ_PLUGIN_MANIFEST | jq -r '.version')"
+          export CZ_PLUGIN_VERSION="$(cat $CZ_PLUGIN_MANIFEST | jq -r '.version')-beta-$(date +%Y%m%d%H%M%S)"
           export CZ_PLUGIN_NAME="$(cat $CZ_PLUGIN_MANIFEST | jq -r '.name')"
           export CZ_PLUGIN_PACKAGE_NAME="${CZ_PLUGIN_NAME}.${CZ_PLUGIN_VERSION}"
           export CZ_NUGET_PATH="${{ github.workspace }}/bin/${CZ_PLUGIN_PACKAGE_NAME}.nupkg"
@@ -27,7 +27,7 @@ jobs:
 
           # build
           dotnet restore
-          dotnet build -c Release --no-restore
+          dotnet build -c Release --no-restore -p:PackageVersion=${CZ_PLUGIN_VERSION}
         
       - uses: actions/upload-artifact@v4
         with: 
