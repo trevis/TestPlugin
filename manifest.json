@@ -2,7 +2,7 @@
   "name": "TestPlugin",
   "author": "trevis",
   "entryfile": "TestPlugin.dll",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "test plugin",
   "environments": [ "Launcher", "Client" ]
 }

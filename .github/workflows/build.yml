@@ -68,11 +68,6 @@ jobs:
         with: 
           name: "${{ env.CZ_PLUGIN_PACKAGE_NAME }}.zip"
           path: "${{ github.workspace }}/bin/net8.0/"
-
-      - name: Push GitHub NuGet Package
-        run: |
-          dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-          dotnet nuget push "${{ env.CZ_NUGET_PATH }}" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
       
       - name: Upload release binaries
         if: ${{ (github.ref != 'refs/heads/master') && (github.ref != 'refs/heads/main') }}
@@ -81,3 +76,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         with:
           asset_paths: '["${{ github.workspace }}/bin/${{ env.CZ_PLUGIN_PACKAGE_NAME }}.zip"]'
+
+      - name: Push GitHub NuGet Package
+        run: |
+          dotnet nuget add source --username ${{ github.repository_owner }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+          dotnet nuget push "${{ env.CZ_NUGET_PATH }}" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
