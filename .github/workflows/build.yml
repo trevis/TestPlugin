@@ -57,6 +57,7 @@ jobs:
         run: |
           cd "${{ github.workspace }}/bin/net8.0/"
           zip -r "${{ github.workspace }}/bin/${{ env.CZ_PLUGIN_PACKAGE_NAME }}.zip" ./*
+          ls -lah "${{ github.workspace }}/bin/"
 
       - uses: actions/upload-artifact@v4
         with: 
