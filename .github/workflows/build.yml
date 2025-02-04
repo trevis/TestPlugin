@@ -16,8 +16,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Ensure Manifest Beta Version
-        if: ${{ (github.ref != 'refs/heads/master') && (github.ref != 'refs/heads/main') && github.event.release.prerelease }}
+      - name: Ensure Manifest Release Version
+        if: ${{ (github.ref != 'refs/heads/master') && (github.ref != 'refs/heads/main') }}
         run: echo "$( jq '.version = "${{ github.event.release.tag_name }}"' ${{ github.workspace }}/manifest.json )" > ${{ github.workspace }}/manifest.json
 
       - name: Setup Release Manifest Variables
